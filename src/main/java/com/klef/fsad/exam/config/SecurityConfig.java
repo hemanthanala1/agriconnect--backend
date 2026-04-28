@@ -75,13 +75,14 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedOrigins(Arrays.asList(
-                "http://localhost:3000",
-                "http://localhost:5173",
-                "http://127.0.0.1:5173",
-                "http://127.0.0.1:3000"
-                // 👉 ADD YOUR DEPLOYED FRONTEND URL HERE LATER
-                // "https://your-frontend.onrender.com"
-        ));
+        	    "http://localhost:3000",
+        	    "http://localhost:5173",
+        	    "http://127.0.0.1:5173",
+        	    "http://127.0.0.1:3000",
+
+        	    // ✅ ADD THIS
+        	    "https://your-frontend.onrender.com"
+        	));
 
         configuration.setAllowedMethods(Arrays.asList(
                 "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"
