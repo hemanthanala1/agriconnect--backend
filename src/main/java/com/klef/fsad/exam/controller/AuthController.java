@@ -9,27 +9,38 @@ import org.springframework.web.bind.annotation.RestController;
 import com.klef.fsad.exam.dto.LoginRequest;
 import com.klef.fsad.exam.dto.LoginResponse;
 import com.klef.fsad.exam.dto.RegisterRequest;
+import com.klef.fsad.exam.model.User;
+import com.klef.fsad.exam.repository.UserRepository;
 import com.klef.fsad.exam.service.AuthService;
 import com.klef.fsad.exam.util.ApiResponse;
-import org.springframework.web.bind.annotation.CrossOrigin;
-
-import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/auth")
-@CrossOrigin(origins = "http://localhost:3000")
 public class AuthController {
 
     @Autowired
-    private AuthService service;
+    private AuthService authService;
+
+    @Autowired
+    private UserRepository repo;
 
     @PostMapping("/register")
-    public ApiResponse<String> register(@Valid @RequestBody RegisterRequest req) {
-        return new ApiResponse<>("success", service.register(req), null);
+    public ApiResponse<LoginResponse> register(@RequestBody RegisterRequest request) {
+        try {
+            LoginResponse response = authService.register(request);
+            return new ApiResponse<>("success", "Registration successful", response);
+        } catch (Exception e) {
+            return new ApiResponse<>("error", e.getMessage(), null);
+        }
     }
 
     @PostMapping("/login")
-    public ApiResponse<LoginResponse> login(@RequestBody LoginRequest req) {
-        return new ApiResponse<>("success", "Login successful", service.login(req));
+    public ApiResponse<LoginResponse> login(@RequestBody LoginRequest request) {
+        try {
+            LoginResponse response = authService.login(request);
+            return new ApiResponse<>("success", "Login successful", response);
+        } catch (Exception e) {
+            return new ApiResponse<>("error", e.getMessage(), null);
+        }
     }
 }

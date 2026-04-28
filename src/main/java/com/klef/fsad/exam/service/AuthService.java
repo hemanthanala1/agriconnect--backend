@@ -24,8 +24,7 @@ public class AuthService {
     @Autowired
     private PasswordEncoder encoder;
 
-    public String register(RegisterRequest req) {
-
+    public LoginResponse register(RegisterRequest req) {
         User user = new User();
         user.setFirstName(req.firstName);
         user.setLastName(req.lastName);
@@ -33,9 +32,22 @@ public class AuthService {
         user.setPassword(encoder.encode(req.password));
         user.setRole(Role.valueOf(req.role));
 
-        repo.save(user);
+        User savedUser = repo.save(user);
 
-        return "Registered Successfully";
+        // Auto-login after registration
+        String token = jwt.generateToken(
+                savedUser.getEmail(),
+                savedUser.getRole().name()
+        );
+
+        return new LoginResponse(
+                savedUser.getId(),
+                savedUser.getEmail(),
+                savedUser.getFirstName(),
+                savedUser.getLastName(),
+                savedUser.getRole().name(),
+                token
+        );
     }
 
     public LoginResponse login(LoginRequest req) {
@@ -53,6 +65,14 @@ public class AuthService {
                 user.getRole().name()
         );
 
-        return new LoginResponse(token);
+        // Return complete user data with token
+        return new LoginResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getRole().name(),
+                token
+        );
     }
 }

@@ -1,22 +1,20 @@
 package com.klef.fsad.exam.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.bind.annotation.*;
 import com.klef.fsad.exam.model.Crop;
 import com.klef.fsad.exam.service.CropService;
 import com.klef.fsad.exam.util.ApiResponse;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/crops")
+@CrossOrigin(
+    origins = {"http://localhost:3000", "http://localhost:5173", "http://127.0.0.1:5173"},
+    methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS},
+    allowCredentials = "true",
+    maxAge = 3600
+)
 public class CropController {
 
     @Autowired
@@ -35,6 +33,12 @@ public class CropController {
     @GetMapping("/{id}")
     public ApiResponse<Crop> getCropById(@PathVariable Long id) {
         return new ApiResponse<>("success", "Crop found", service.getCropById(id));
+    }
+
+    // 🔥 ADD THIS ENDPOINT
+    @GetMapping("/user/{userId}")
+    public ApiResponse<List<Crop>> getUserCrops(@PathVariable Long userId) {
+        return new ApiResponse<>("success", "User crops", service.getUserCrops(userId));
     }
 
     @DeleteMapping("/delete/{id}")
