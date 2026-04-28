@@ -13,6 +13,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.klef.fsad.exam.security.JwtFilter;
 
+import java.util.Arrays;
+
 @Configuration
 public class SecurityConfig {
 
@@ -23,55 +25,75 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                // PUBLIC
+
+                // ✅ ROOT + HEALTH (FIXES 403)
+                .requestMatchers("/", "/health").permitAll()
+
+                // ✅ AUTH (PUBLIC)
                 .requestMatchers("/api/v1/auth/**").permitAll()
-                // SWAGGER
+
+                // ✅ SWAGGER (PUBLIC)
                 .requestMatchers(
-                    "/swagger-ui.html",
-                    "/swagger-ui/**",
-                    "/v3/api-docs/**",
-                    "/swagger-resources/**",
-                    "/webjars/**"
+                        "/swagger-ui.html",
+                        "/swagger-ui/**",
+                        "/v3/api-docs/**",
+                        "/swagger-resources/**",
+                        "/webjars/**"
                 ).permitAll()
-                // ROLE BASED - FARMER ENDPOINTS
+
+                // ✅ FARMER
                 .requestMatchers("/api/v1/crops/**").hasAnyRole("FARMER", "ADMIN")
                 .requestMatchers("/api/v1/farmer/**").hasRole("FARMER")
                 .requestMatchers("/api/v1/advice/ask").hasRole("FARMER")
-                // EXPERT ENDPOINTS
+
+                // ✅ EXPERT
                 .requestMatchers("/api/v1/expert/**").hasRole("EXPERT")
                 .requestMatchers("/api/v1/advice/answer/**").hasRole("EXPERT")
-                // ADMIN ENDPOINTS
+
+                // ✅ ADMIN
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-                // ALL OTHER REQUESTS REQUIRE AUTHENTICATION
+
+                // 🔒 EVERYTHING ELSE
                 .anyRequest().authenticated()
             );
 
+        // ✅ JWT FILTER
         http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
+    // ✅ PASSWORD ENCODER
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    // ✅ CORS CONFIG
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(java.util.Arrays.asList(
-            "http://localhost:3000",
-            "http://localhost:5173",
-            "http://127.0.0.1:5173",
-            "http://127.0.0.1:3000"
+
+        configuration.setAllowedOrigins(Arrays.asList(
+                "http://localhost:3000",
+                "http://localhost:5173",
+                "http://127.0.0.1:5173",
+                "http://127.0.0.1:3000"
+                // 👉 ADD YOUR DEPLOYED FRONTEND URL HERE LATER
+                // "https://your-frontend.onrender.com"
         ));
-        configuration.setAllowedMethods(java.util.Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-        configuration.setAllowedHeaders(java.util.Arrays.asList("*"));
+
+        configuration.setAllowedMethods(Arrays.asList(
+                "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"
+        ));
+
+        configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/**", configuration);
+        source.registerCorsConfiguration("/**", configuration);
+
         return source;
     }
 }
