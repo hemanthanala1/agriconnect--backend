@@ -81,7 +81,7 @@ public class SecurityConfig {
         	    "http://127.0.0.1:3000",
 
         	    // ✅ ADD THIS
-        	    "https://your-frontend.onrender.com"
+        	    "https://agriconnect-i26x.onrender.com"
         	));
 
         configuration.setAllowedMethods(Arrays.asList(
